@@ -51,7 +51,7 @@ async def detect_faces(face_detector, detector_backend: str, img, align=True):
     detect_face_fn = backends.get(detector_backend)
 
     if detect_face_fn:  # pylint: disable=no-else-return
-        obj = detect_face_fn(face_detector, img, align)
+        obj = await detect_face_fn(face_detector, img, align)
         # obj stores list of (detected_face, region, confidence)
         return obj
     else:

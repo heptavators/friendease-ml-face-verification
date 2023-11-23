@@ -30,11 +30,31 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(data, {"message": "Hello World"})
 
     async def test_verify_endpoint_verified(self):
-        urls = []
-        payload = {}
+        payload = {
+            "template1": "https://storage.googleapis.com/payroll_anggi/test/input.png",
+            "template2": "https://storage.googleapis.com/payroll_anggi/test/ktp.png",
+            "profile_image": "https://storage.googleapis.com/payroll_anggi/test/output.png",
+        }
         response = await self.__post__("verify", payload)
 
-        # self.assertEqual(response, {'verified': False})
+        self.assertEqual(response, {"verified": True})
 
     async def test_verify_endpoint_not_verified(self):
         pass
+
+    async def test_verify_endpoint_multiple_requests(self):
+        payload = {
+            "template1": "https://storage.googleapis.com/payroll_anggi/test/input.png",
+            "template2": "https://storage.googleapis.com/payroll_anggi/test/ktp.png",
+            "profile_image": "https://storage.googleapis.com/payroll_anggi/test/output.png",
+        }
+
+        N = 10
+        start = time.perf_counter()
+        response = await asyncio.gather(
+            *[self.__post__("verify", payload) for _ in range(N)]
+        )
+        end = time.perf_counter()
+        print(f"HTTP Post {N} requests takes {end-start} seconds")
+
+        self.assertEqual(len(response), 10)

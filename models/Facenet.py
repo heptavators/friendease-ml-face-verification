@@ -2,7 +2,7 @@ import os
 import gdown
 import tensorflow as tf
 
-from deepface.commons import functions
+from common import functions
 from keras.models import Model
 from keras.layers import Activation
 from keras.layers import BatchNormalization
@@ -2223,17 +2223,17 @@ def loadModel(
 
     # -----------------------------------
 
-    home = functions.get_deepface_home()
+    home = functions.get_facenet_home()
 
-    if os.path.isfile(home + "/.deepface/weights/facenet_weights.h5") != True:
+    if os.path.isfile(home + "/.facenet/weights/facenet_weights.h5") != True:
         print("facenet_weights.h5 will be downloaded...")
 
-        output = home + "/.deepface/weights/facenet_weights.h5"
+        output = home + "/.facenet/weights/facenet_weights.h5"
         gdown.download(url, output, quiet=False)
 
     # -----------------------------------
 
-    model.load_weights(home + "/.deepface/weights/facenet_weights.h5")
+    model.load_weights(home + "/.facenet/weights/facenet_weights.h5")
 
     # -----------------------------------
 

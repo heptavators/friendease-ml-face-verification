@@ -1,4 +1,11 @@
+import logging
+import warnings
+import tensorflow as tf
+
 from loguru import logger
+
+tf.get_logger().setLevel(logging.ERROR)
+warnings.filterwarnings("ignore")
 
 logger = logger
 

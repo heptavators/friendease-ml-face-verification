@@ -225,7 +225,7 @@ async def extract_faces(
     return extracted_faces
 
 
-async def normalize_input(img, normalization="base") -> np.ndarray:
+def normalize_input(img, normalization: str = "base") -> np.ndarray:
     """Normalize input image.
 
     Args:
@@ -283,7 +283,7 @@ async def normalize_input(img, normalization="base") -> np.ndarray:
     return img
 
 
-async def find_target_size(model_name: str = "Facenet") -> tuple:
+def find_target_size(model_name: str) -> tuple:
     """Find the target size of the model.
 
     Args:

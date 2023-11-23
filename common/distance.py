@@ -1,7 +1,7 @@
 import numpy as np
 
 
-async def findCosineDistance(source_representation, test_representation) -> float:
+def findCosineDistance(source_representation, test_representation) -> float:
     a = np.matmul(np.transpose(source_representation), test_representation)
     b = np.sum(np.multiply(source_representation, source_representation))
     c = np.sum(np.multiply(test_representation, test_representation))
@@ -25,7 +25,7 @@ async def l2_normalize(x) -> float:
     return x / np.sqrt(np.sum(np.multiply(x, x)))
 
 
-async def findThreshold(
+def findThreshold(
     model_name: str = "Facenet", distance_metric: str = "cosine"
 ) -> float:
     base_threshold = {"cosine": 0.40, "euclidean": 0.55, "euclidean_l2": 0.75}

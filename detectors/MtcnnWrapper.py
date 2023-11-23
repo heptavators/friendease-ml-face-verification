@@ -1,6 +1,6 @@
 import cv2
 
-from detectors import FaceDetector
+from . import FaceDetector
 from mtcnn import MTCNN
 
 
@@ -31,7 +31,7 @@ async def detect_face(face_detector, img, align=True):
                 keypoints = detection["keypoints"]
                 left_eye = keypoints["left_eye"]
                 right_eye = keypoints["right_eye"]
-                detected_face = FaceDetector.alignment_procedure(
+                detected_face = await FaceDetector.alignment_procedure(
                     detected_face, left_eye, right_eye
                 )
 
