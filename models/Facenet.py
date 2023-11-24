@@ -3,26 +3,26 @@ import gdown
 import tensorflow as tf
 
 from common import functions
-from keras.models import Model
-from keras.layers import Activation
-from keras.layers import BatchNormalization
-from keras.layers import Concatenate
-from keras.layers import Conv2D
-from keras.layers import Dense
-from keras.layers import Dropout
-from keras.layers import GlobalAveragePooling2D
-from keras.layers import Input
-from keras.layers import Lambda
-from keras.layers import MaxPooling2D
-from keras.layers import add
-from keras import backend as K
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Activation
+from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.layers import Concatenate
+from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import GlobalAveragePooling2D
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Lambda
+from tensorflow.keras.layers import MaxPooling2D
+from tensorflow.keras.layers import add
+from tensorflow.keras import backend as K
 
 
 def scaling(x, scale):
     return x * scale
 
 
-def InceptionResNetV2(dimension=128):
+def InceptionResNetV2(dimension=128) -> Model:
     inputs = Input(shape=(160, 160, 3))
     x = Conv2D(32, 3, strides=2, padding="valid", use_bias=False, name="Conv2d_1a_3x3")(
         inputs
@@ -2218,7 +2218,7 @@ def InceptionResNetV2(dimension=128):
 
 def loadModel(
     url="https://github.com/serengil/deepface_models/releases/download/v1.0/facenet_weights.h5",
-):
+) -> Model:
     model = InceptionResNetV2()
 
     # -----------------------------------

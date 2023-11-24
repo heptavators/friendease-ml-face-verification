@@ -97,7 +97,7 @@ async def load_image(img: str) -> np.ndarray:
     if img.startswith("http"):
         return await fetch_image(img)
     # The image is a base64 string
-    elif type(img) == str:
+    elif isinstance(img, str):
         return await load_base64_image(img)
     else:
         logger.error("Can't load the image, make it's either an url or base64")
@@ -106,6 +106,7 @@ async def load_image(img: str) -> np.ndarray:
 async def extract_faces(
     img: str,
     target_size: tuple,
+    detector_backend: str = "mtcnn",
     grayscale: bool = False,
     enforce_detection: bool = True,
 ) -> list:
@@ -114,6 +115,7 @@ async def extract_faces(
     Args:
         img: an url or base64.
         target_size (tuple): the target size of the extracted faces.
+        detector_backend (str, optional): the face detector backend. Defaults to 'mtcnn'.
         grayscale (bool, optional): whether to convert the extracted faces to grayscale.
         Defaults to False.
         enforce_detection (bool, optional): whether to enforce face detection. Defaults to True.
@@ -129,11 +131,13 @@ async def extract_faces(
     extracted_faces = []
 
     # img might be path, base64 or numpy array. Convert it to numpy whatever it is.
-    img = await load_image(img)
     img_region = [0, 0, img.shape[1], img.shape[0]]
 
-    face_detector = FaceDetector.build_model()
-    face_objs = await FaceDetector.detect_faces(face_detector, img)
+    if detector_backend == "skip":
+        face_objs = [(img, img_region, 0)]
+    else:
+        face_detector = FaceDetector.build_model()
+        face_objs = await FaceDetector.detect_faces(face_detector, img)
 
     # in case of no face found
     if len(face_objs) == 0 and enforce_detection is True:

@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def findCosineDistance(source_representation, test_representation) -> float:
+async def findCosineDistance(source_representation, test_representation) -> float:
     a = np.matmul(np.transpose(source_representation), test_representation)
     b = np.sum(np.multiply(source_representation, source_representation))
     c = np.sum(np.multiply(test_representation, test_representation))
@@ -22,7 +22,7 @@ async def findEuclideanDistance(source_representation, test_representation) -> f
 
 
 def findThreshold(distance_metric: str = "cosine") -> float:
-    thresholds = {"cosine": 0.40, "euclidean": 10, "euclidean_l2": 0.80}
+    thresholds = {"cosine": 0.40, "euclidean": 10}
 
     threshold = thresholds.get(distance_metric, 0.4)
 

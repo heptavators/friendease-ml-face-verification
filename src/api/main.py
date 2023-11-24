@@ -40,15 +40,8 @@ async def verify_face(payload: Request) -> dict:
     profile_image = payload.get("profile_image")
 
     start = time.perf_counter()
-    result1, result2 = await asyncio.gather(
-        FaceVerifier.verify(template1, profile_image),
-        FaceVerifier.verify(template2, profile_image),
-    )
+    result = await FaceVerifier.verify(template1, template2, profile_image)
     end = time.perf_counter()
     print(f"Verifying needs {end-start} seconds")
 
-    verified = False
-    if result1["verified"] or result2["verified"]:
-        verified = True
-
-    return {"verified": verified}
+    return result
