@@ -255,11 +255,10 @@ async def represent(
             if img.max() > 1:
                 img /= 255
         # --------------------------------
-        img_region = [0, 0, img.shape[1], img.shape[0]]
-        img_objs = [(img, img_region, 0)]
+        img_objs = [(img, 0, 0)]
     # ---------------------------------
 
-    for img, region, confidence in img_objs:
+    for img, _, _ in img_objs:
         # custom normalization
         img = functions.normalize_input(img=img, normalization=normalization)
 
@@ -274,8 +273,6 @@ async def represent(
 
         resp_obj = {}
         resp_obj["embedding"] = embedding
-        resp_obj["facial_area"] = region
-        resp_obj["face_confidence"] = confidence
         resp_objs.append(resp_obj)
 
     return resp_objs

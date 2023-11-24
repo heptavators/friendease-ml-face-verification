@@ -5,57 +5,26 @@ import asyncio
 from PIL import Image
 from common import distance
 from detectors import MtcnnWrapper
-from logs import logger
 
 
-def build_model(detector_backend: str):
+def build_model():
     global face_detector_obj  # singleton design pattern
 
-    backends = {"mtcnn": MtcnnWrapper.build_model}
-
     if not "face_detector_obj" in globals():
-        face_detector_obj = {}
+        face_detector_obj = MtcnnWrapper.build_model()
 
-    built_models = list(face_detector_obj.keys())
-    if detector_backend not in built_models:
-        face_detector = backends.get(detector_backend)
-
-        if face_detector:
-            face_detector = face_detector()
-            face_detector_obj[detector_backend] = face_detector
-        else:
-            logger.error("invalid detector_backend passed - " + detector_backend)
-
-    return face_detector_obj[detector_backend]
+    return face_detector_obj
 
 
-async def detect_face(face_detector, detector_backend: str, img, align=True):
-    obj = await detect_faces(face_detector, detector_backend, img, align)
+async def detect_faces(face_detector, img):
+    """
+    This functions detects all faces in an image and return them in list of faces
 
-    if len(obj) > 0:
-        face, region, confidence = obj[0]  # discard multiple faces
-
-    # If no face is detected, set face to None,
-    # image region to full image, and confidence to 0.
-    else:  # len(obj) == 0
-        face = None
-        region = [0, 0, img.shape[1], img.shape[0]]
-        confidence = 0
-
-    return face, region, confidence
-
-
-async def detect_faces(face_detector, detector_backend: str, img, align=True):
-    backends = {"mtcnn": MtcnnWrapper.detect_face}
-
-    detect_face_fn = backends.get(detector_backend)
-
-    if detect_face_fn:  # pylint: disable=no-else-return
-        obj = await detect_face_fn(face_detector, img, align)
-        # obj stores list of (detected_face, region, confidence)
-        return obj
-    else:
-        logger.error("invalid detector_backend passed - " + detector_backend)
+    Returns:
+        List of detected faces
+    """
+    # obj stores list of (detected_face, region, confidence)
+    return await MtcnnWrapper.detect_face(face_detector, img)
 
 
 async def alignment_procedure(img, left_eye, right_eye):

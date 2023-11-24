@@ -21,17 +21,9 @@ async def findEuclideanDistance(source_representation, test_representation) -> f
     return euclidean_distance
 
 
-async def l2_normalize(x) -> float:
-    return x / np.sqrt(np.sum(np.multiply(x, x)))
+def findThreshold(distance_metric: str = "cosine") -> float:
+    thresholds = {"cosine": 0.40, "euclidean": 10, "euclidean_l2": 0.80}
 
-
-def findThreshold(
-    model_name: str = "Facenet", distance_metric: str = "cosine"
-) -> float:
-    base_threshold = {"cosine": 0.40, "euclidean": 0.55, "euclidean_l2": 0.75}
-
-    thresholds = {"Facenet": {"cosine": 0.40, "euclidean": 10, "euclidean_l2": 0.80}}
-
-    threshold = thresholds.get(model_name, base_threshold).get(distance_metric, 0.4)
+    threshold = thresholds.get(distance_metric, 0.4)
 
     return threshold

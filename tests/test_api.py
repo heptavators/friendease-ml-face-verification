@@ -31,9 +31,9 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
 
     async def test_verify_endpoint_verified(self):
         payload = {
-            "template1": "https://storage.googleapis.com/payroll_anggi/test/input.png",
-            "template2": "https://storage.googleapis.com/payroll_anggi/test/ktp.png",
-            "profile_image": "https://storage.googleapis.com/payroll_anggi/test/output.png",
+            "template1": "",
+            "template2": "",
+            "profile_image": "",
         }
         response = await self.__post__("verify", payload)
 
@@ -44,12 +44,12 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
 
     async def test_verify_endpoint_multiple_requests(self):
         payload = {
-            "template1": "https://storage.googleapis.com/payroll_anggi/test/input.png",
-            "template2": "https://storage.googleapis.com/payroll_anggi/test/ktp.png",
-            "profile_image": "https://storage.googleapis.com/payroll_anggi/test/output.png",
+            "template1": "",
+            "template2": "",
+            "profile_image": "",
         }
 
-        N = 10
+        N = 20
         start = time.perf_counter()
         response = await asyncio.gather(
             *[self.__post__("verify", payload) for _ in range(N)]
@@ -57,4 +57,4 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
         end = time.perf_counter()
         print(f"HTTP Post {N} requests takes {end-start} seconds")
 
-        self.assertEqual(len(response), 10)
+        self.assertEqual(len(response), N)

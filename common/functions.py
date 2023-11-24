@@ -3,7 +3,7 @@ import base64
 import numpy as np
 import cv2
 import aiohttp
-import imageio.v2 as imageio
+import imageio.v3 as iio
 
 from pathlib import Path
 from keras.preprocessing import image
@@ -51,7 +51,7 @@ async def fetch_image(url) -> np.ndarray:
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             image_binary = await response.read()
-            image = imageio.imread(image_binary)
+            image = iio.imread(image_binary)
 
             # Remove the alpha channel if present
             if image.shape[-1] == 4:
@@ -71,7 +71,7 @@ async def load_base64_image(uri: str) -> np.ndarray:
     """
 
     decoded_image = base64.b64decode(uri)
-    image = imageio.imread(decoded_image)
+    image = iio.imread(decoded_image)
 
     # Remove the alpha channel if present
     if image.shape[-1] == 4:
@@ -80,11 +80,11 @@ async def load_base64_image(uri: str) -> np.ndarray:
     return image.astype(dtype=np.uint8)
 
 
-async def load_image(img) -> np.ndarray:
-    """Load image from path, url, base64 or numpy array.
+async def load_image(img: str) -> np.ndarray:
+    """Load image from url or base64.
 
     Args:
-        img: a path, url, base64 or numpy array.
+        img: an url or base64.
 
     Raises:
         ValueError: if the image path does not exist.
@@ -92,37 +92,31 @@ async def load_image(img) -> np.ndarray:
     Returns:
         numpy array: the loaded image.
     """
-    # The image is already a numpy array
-    if type(img).__module__ == np.__name__:
-        return img
 
     # The image is a url
     if img.startswith("http"):
         return await fetch_image(img)
-
     # The image is a base64 string
-    return await load_base64_image(img)
+    elif type(img) == str:
+        return await load_base64_image(img)
+    else:
+        logger.error("Can't load the image, make it's either an url or base64")
 
 
 async def extract_faces(
-    img,
-    target_size: tuple = (224, 224),
-    detector_backend: str = "mtcnn",
+    img: str,
+    target_size: tuple,
     grayscale: bool = False,
     enforce_detection: bool = True,
-    align: bool = True,
-):
+) -> list:
     """Extract faces from an image.
 
     Args:
-        img: a path, url, base64 or numpy array.
-        target_size (tuple, optional): the target size of the extracted faces.
-        Defaults to (224, 224).
-        detector_backend (str, optional): the face detector backend. Defaults to "opencv".
+        img: an url or base64.
+        target_size (tuple): the target size of the extracted faces.
         grayscale (bool, optional): whether to convert the extracted faces to grayscale.
         Defaults to False.
         enforce_detection (bool, optional): whether to enforce face detection. Defaults to True.
-        align (bool, optional): whether to align the extracted faces. Defaults to True.
 
     Raises:
         ValueError: if face could not be detected and enforce_detection is True.
@@ -138,13 +132,8 @@ async def extract_faces(
     img = await load_image(img)
     img_region = [0, 0, img.shape[1], img.shape[0]]
 
-    if detector_backend == "skip":
-        face_objs = [(img, img_region, 0)]
-    else:
-        face_detector = FaceDetector.build_model(detector_backend)
-        face_objs = await FaceDetector.detect_faces(
-            face_detector, detector_backend, img, align
-        )
+    face_detector = FaceDetector.build_model()
+    face_objs = await FaceDetector.detect_faces(face_detector, img)
 
     # in case of no face found
     if len(face_objs) == 0 and enforce_detection is True:
@@ -161,8 +150,7 @@ async def extract_faces(
             if grayscale is True:
                 current_img = cv2.cvtColor(current_img, cv2.COLOR_BGR2GRAY)
 
-            # resize and padding
-            if current_img.shape[0] > 0 and current_img.shape[1] > 0:
+                # resize and padding
                 factor_0 = target_size[0] / current_img.shape[0]
                 factor_1 = target_size[1] / current_img.shape[1]
                 factor = min(factor_0, factor_1)
@@ -201,7 +189,6 @@ async def extract_faces(
                 current_img = cv2.resize(current_img, target_size)
 
             # normalizing the image pixels
-            # what this line doing? must?
             img_pixels = image.img_to_array(current_img)
             img_pixels = np.expand_dims(img_pixels, axis=0)
             img_pixels /= 255  # normalize input in [0, 1]
@@ -225,7 +212,7 @@ async def extract_faces(
     return extracted_faces
 
 
-def normalize_input(img, normalization: str = "base") -> np.ndarray:
+def normalize_input(img: np.ndarray, normalization: str = "base") -> np.ndarray:
     """Normalize input image.
 
     Args:
@@ -283,23 +270,13 @@ def normalize_input(img, normalization: str = "base") -> np.ndarray:
     return img
 
 
-def find_target_size(model_name: str) -> tuple:
+def find_target_size() -> tuple:
     """Find the target size of the model.
-
-    Args:
-        model_name (str): the model name.
 
     Returns:
         tuple: the target size.
     """
 
-    target_sizes = {
-        "Facenet": (160, 160),
-    }
-
-    target_size = target_sizes.get(model_name)
-
-    if target_size == None:
-        logger.error(f"Unimplemented model name - {model_name}")
+    target_size = (160, 160)
 
     return target_size

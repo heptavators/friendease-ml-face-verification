@@ -6,6 +6,7 @@ import time
 from fastapi import FastAPI, Path, Query, Request
 from pydantic import BaseModel, Field
 from models import FaceVerifier
+from common import functions
 
 
 app = FastAPI(
