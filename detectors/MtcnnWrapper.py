@@ -1,15 +1,16 @@
 import cv2
+import numpy as np
 
 from . import FaceDetector
 from mtcnn import MTCNN
 
 
-def build_model():
+def build_model() -> MTCNN:
     face_detector = MTCNN()
     return face_detector
 
 
-async def detect_face(face_detector, img, align=True):
+def detect_face(face_detector: MTCNN, img: np.ndarray, align=True) -> list:
     resp = []
 
     detected_face = None
@@ -31,7 +32,7 @@ async def detect_face(face_detector, img, align=True):
                 keypoints = detection["keypoints"]
                 left_eye = keypoints["left_eye"]
                 right_eye = keypoints["right_eye"]
-                detected_face = await FaceDetector.alignment_procedure(
+                detected_face = FaceDetector.alignment_procedure(
                     detected_face, left_eye, right_eye
                 )
 

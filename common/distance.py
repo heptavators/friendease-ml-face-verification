@@ -8,7 +8,7 @@ async def findCosineDistance(source_representation, test_representation) -> floa
     return 1 - (a / (np.sqrt(b) * np.sqrt(c)))
 
 
-async def findEuclideanDistance(source_representation, test_representation) -> float:
+def findEuclideanDistance(source_representation, test_representation) -> float:
     if isinstance(source_representation, list):
         source_representation = np.array(source_representation)
 

@@ -11,8 +11,6 @@ from tensorflow.keras.models import Model
 
 def build_model() -> Model:
     """
-    This function builds a Face Verification model
-
     Returns:
             built Face Verification model
     """
@@ -26,13 +24,11 @@ def build_model() -> Model:
     return model_obj
 
 
-async def verify(
-    template1: str,
-    template2: str,
-    profile_image: str,
+def verify(
+    template1: np.ndarray,
+    template2: np.ndarray,
+    profile_image: np.ndarray,
     distance_metric: str = "cosine",
-    enforce_detection: bool = True,
-    normalization="Facenet",
 ) -> dict:
     """
     This function verifies an image pair is same person or different persons. In the background,
@@ -41,14 +37,15 @@ async def verify(
     distance) than vectors of different persons.
 
     Parameters:
-            template1, template2, profile_image: image url or based64 encoded
-            If one of pair has more than one face, then we will immediately return False
+            template1, template2, profile_image: numpy array (BGR).
 
             distance_metric (string): cosine, euclidean
 
             enforce_detection (boolean): If no face could not be detected in an image, then this
             function will return exception by default. Set this to False not to have this exception.
             This might be convenient for low resolution images.
+
+            align (boolean): alignment according to the eye positions.
 
             normalization (string): normalize the input image before feeding to model
 
@@ -57,66 +54,32 @@ async def verify(
 
             {
                     "verified": True
-                    "alone": True
+                    "message": "Some messages"
             }
 
     """
 
-    template1, template2, profile_image = await asyncio.gather(
-        functions.load_image(template1),
-        functions.load_image(template2),
-        functions.load_image(profile_image),
-    )
-
     # --------------------------------
     target_size = functions.find_target_size()
 
-    # img pairs might have many faces
-    template1_objs, template2_objs, profile_objs = await asyncio.gather(
-        functions.extract_faces(
-            img=template1,
-            target_size=target_size,
-            grayscale=False,
-            enforce_detection=enforce_detection,
-        ),
-        functions.extract_faces(
-            img=template2,
-            target_size=target_size,
-            grayscale=False,
-            enforce_detection=enforce_detection,
-        ),
-        functions.extract_faces(
-            img=profile_image,
-            target_size=target_size,
-            grayscale=False,
-            enforce_detection=enforce_detection,
-        ),
+    template1_objs, template2_objs, profile_objs = (
+        functions.extract_faces(img=template1, target_size=target_size),
+        functions.extract_faces(img=template2, target_size=target_size),
+        functions.extract_faces(img=profile_image, target_size=target_size),
     )
 
     if len(profile_objs) > 1:
-        return {"verified": False, "alone": False}
+        return {
+            "verified": False,
+            "message": "There's more than one people in your profile image, make sure there's only you in the image",
+        }
 
-    # --------------------------------
-    (
-        template1_embedding_obj,
-        template2_embedding_obj,
-        profile_embedding_obj,
-    ) = await asyncio.gather(
-        represent(
-            img=template1_objs[0][0],
-            detector_backend="skip",
-            normalization=normalization,
-        ),
-        represent(
-            img=template2_objs[0][0],
-            detector_backend="skip",
-            normalization=normalization,
-        ),
-        represent(
-            img=profile_objs[0][0],
-            detector_backend="skip",
-            normalization=normalization,
-        ),
+        # --------------------------------
+
+    template1_embedding_obj, template2_embedding_obj, profile_embedding_obj = (
+        represent(template1_objs[0][0]),
+        represent(template2_objs[0][0]),
+        represent(profile_objs[0][0]),
     )
 
     template1_representation = template1_embedding_obj[0]["embedding"]
@@ -124,45 +87,41 @@ async def verify(
     profile_representation = profile_embedding_obj[0]["embedding"]
 
     if distance_metric == "cosine":
-        distance1, distance2 = await asyncio.gather(
+        distance1, distance2 = (
             dst.findCosineDistance(template1_representation, profile_representation),
             dst.findCosineDistance(template2_representation, profile_representation),
         )
     elif distance_metric == "euclidean":
-        distance1, distance2 = await asyncio.gather(
+        distance1, distance2 = (
             dst.findEuclideanDistance(template1_representation, profile_representation),
             dst.findEuclideanDistance(template2_representation, profile_representation),
         )
     else:
         logger.error(f"Invalid distance_metric passed - {distance_metric}")
 
+    # -------------------------------
     threshold = dst.findThreshold(distance_metric)
 
-    resp_obj = {
-        "verified": True
-        if (distance1 <= threshold or distance2 <= threshold)
-        else False,
-        "alone": True,
-    }
+    verified = True if (distance1 <= threshold or distance2 <= threshold) else False
+    message = (
+        "Your face is verified"
+        if verified
+        else "Your face is not verified! You only can upload your own images not other's"
+    )
 
-    return resp_obj
+    return {"verified": verified, "message": message}
 
 
-async def represent(
-    img: np.ndarray,
-    detector_backend: str,
+def represent(
+    img_arr: np.ndarray,
     normalization: str = "Facenet",
-) -> dict:
+) -> list:
     """
     This function represents facial images as vectors. The function uses convolutional neural
     networks models to generate vector embeddings.
 
     Parameters:
-            img (string): numpy array (BGR).
-
-            enforce_detection (boolean): If no face could not be detected in an image, then this
-            function will return exception by default. Set this to False not to have this exception.
-            This might be convenient for low resolution images.
+            img_arr: numpy array (BGR)
 
             normalization (string): normalize the input image before feeding to model
 
@@ -178,23 +137,17 @@ async def represent(
     # ---------------------------------
     # we have run pre-process in verification. so, this can be skipped if it is coming from verify.
     target_size = functions.find_target_size()
-    if detector_backend != "skip":
-        img_objs = await functions.extract_faces(
-            img=img,
-            target_size=target_size,
-            detector_backend=detector_backend,
-        )
-    else:
-        if len(img.shape) == 4:
-            img = img[0]  # e.g. (1, 224, 224, 3) to (224, 224, 3)
-        if len(img.shape) == 3:
-            img = cv2.resize(img, target_size)
-            img = np.expand_dims(img, axis=0)
-            # when represent is called from verify, this is already normalized
-            if img.max() > 1:
-                img /= 255
 
-            img_objs = [(img, 0, 0)]
+    if len(img_arr.shape) == 4:
+        img_arr = img_arr[0]  # e.g. (1, 224, 224, 3) to (224, 224, 3)
+    if len(img_arr.shape) == 3:
+        img_arr = cv2.resize(img_arr, target_size)
+        img_arr = np.expand_dims(img_arr, axis=0)
+        # when represent is called from verify, this is already normalized
+        if img_arr.max() > 1:
+            img_arr /= 255
+    # --------------------------------
+    img_objs = [(img_arr, 0, 0)]
     # ---------------------------------
 
     for img, _, _ in img_objs:

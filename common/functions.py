@@ -103,8 +103,8 @@ async def load_image(img: str) -> np.ndarray:
         logger.error("Can't load the image, make it's either an url or base64")
 
 
-async def extract_faces(
-    img: str,
+def extract_faces(
+    img: np.ndarray,
     target_size: tuple,
     detector_backend: str = "mtcnn",
     grayscale: bool = False,
@@ -113,9 +113,9 @@ async def extract_faces(
     """Extract faces from an image.
 
     Args:
-        img: an url or base64.
+        img: numpy array (BGR).
         target_size (tuple): the target size of the extracted faces.
-        detector_backend (str, optional): the face detector backend. Defaults to 'mtcnn'.
+        detector_backend (str, optional): the face detector backend. Defaults to "mtcnn".
         grayscale (bool, optional): whether to convert the extracted faces to grayscale.
         Defaults to False.
         enforce_detection (bool, optional): whether to enforce face detection. Defaults to True.
@@ -137,7 +137,7 @@ async def extract_faces(
         face_objs = [(img, img_region, 0)]
     else:
         face_detector = FaceDetector.build_model()
-        face_objs = await FaceDetector.detect_faces(face_detector, img)
+        face_objs = FaceDetector.detect_faces(face_detector, img)
 
     # in case of no face found
     if len(face_objs) == 0 and enforce_detection is True:

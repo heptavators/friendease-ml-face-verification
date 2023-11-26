@@ -1,8 +1,9 @@
 import asyncio
+import base64
 import time
 import aiohttp
 import unittest
-import base64
+import imageio.v3 as iio
 
 LOCALHOST = "http://127.0.0.1:8000"
 
@@ -14,11 +15,10 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
             async with session.get(URL) as response:
                 return await response.json()
 
-    async def __fetch_base64__(self, endpoint: str = "") -> dict:
+    async def __fetch_base64__(self, endpoint: str = "") -> str:
         async with aiohttp.ClientSession() as session:
             async with session.get(endpoint) as response:
                 image_binary = await response.read()
-
                 return base64.b64encode(image_binary).decode("utf-8")
 
     async def __post__(self, endpoint: str, payload: dict) -> dict:
@@ -37,6 +37,9 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
 
     async def test_verify_endpoint_payload_url_verified(self):
         payload = {
+            "template1": template1,
+            "template2": template2,
+            "profile_image": profile_image,
             "template1": "https://storage.googleapis.com/payroll_anggi/test/input.png",
             "template2": "https://storage.googleapis.com/payroll_anggi/test/ktp.png",
             "profile_image": "https://storage.googleapis.com/payroll_anggi/test/output.png",
@@ -44,7 +47,7 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
 
         response = await self.__post__("verify", payload)
 
-        self.assertEqual(response, {"verified": True, "alone": True})
+        self.assertEqual(response, {"verified": True})
 
     async def test_verify_endpoint_payload_base64_verified(self):
         template1, template2, profile_image = await asyncio.gather(
@@ -67,9 +70,11 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
 
         response = await self.__post__("verify", payload)
 
-        self.assertEqual(response, {"verified": True, "alone": True})
+        self.assertEqual(
+            response, {"verified": True, "message": "Your face is verified"}
+        )
 
-    async def test_verify_endpoint_not_verified(self):
+    async def test_verify_endpoint_payload_url_not_verified(self):
         pass
 
     async def test_verify_endpoint_payload_url_multiple_requests(self):
@@ -79,7 +84,7 @@ class TestAPI(unittest.IsolatedAsyncioTestCase):
             "profile_image": "https://storage.googleapis.com/payroll_anggi/test/output.png",
         }
 
-        N = 20
+        N = 50
         start = time.perf_counter()
         response = await asyncio.gather(
             *[self.__post__("verify", payload) for _ in range(N)]

@@ -20,11 +20,7 @@ class FaceResult(BaseModel):
     """Result for Face Verification whether it's verified or not"""
 
     verified: bool = Field(description="Face is verified or not")
-    distance: float = Field(
-        description="The distance between template and observed image"
-    )
-    threshold: float = Field(description="Threshold for face verification to be passed")
-    time: float = Field(description="How long does it take to verify")
+    message: str = Field(description="Message for the face verification")
 
 
 @app.get("/")
@@ -33,15 +29,20 @@ async def root():
 
 
 @app.post("/verify")
-async def verify_face(payload: Request) -> dict:
+async def verify_face(payload: Request) -> FaceResult:
     payload = await payload.json()
-    template1 = payload.get("template1")
-    template2 = payload.get("template2")
-    profile_image = payload.get("profile_image")
+
+    template1, template2, profile_image = await asyncio.gather(
+        functions.load_image(payload.get("template1")),
+        functions.load_image(payload.get("template2")),
+        functions.load_image(payload.get("profile_image")),
+    )
 
     start = time.perf_counter()
-    result = await FaceVerifier.verify(template1, template2, profile_image)
+    result = FaceVerifier.verify(template1, template2, profile_image)
     end = time.perf_counter()
     print(f"Verifying needs {end-start} seconds")
 
-    return result
+    response = FaceResult(verified=result["verified"], message=result["message"])
+
+    return response
