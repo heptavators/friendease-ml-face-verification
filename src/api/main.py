@@ -1,6 +1,5 @@
-import asyncio
-from unittest import result
 import numpy as np
+import asyncio
 import time
 
 from fastapi import FastAPI, Path, Query, Request

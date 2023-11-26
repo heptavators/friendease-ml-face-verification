@@ -4,7 +4,7 @@ import httpx
 import imageio.v2 as imageio
 import numpy as np
 
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from common import functions
 
 URL = "https://wallpapercave.com/wp/wp8913058.jpg"
@@ -36,10 +36,9 @@ def fetch_thread(N, num_thread: int = None):
 if __name__ == "__main__":
     N = 100
 
-    # start = time.perf_counter()
-    # loop = asyncio.get_event_loop()
-    # results = loop.run_until_complete(fetch_async(N))
-    # print(len(results))
-    # end = time.perf_counter()
-    # print(f"Fetching {N} requests takes {end-start} seconds")
-    print(tuple(range(2)))
+    start = time.perf_counter()
+    loop = asyncio.get_event_loop()
+    results = loop.run_until_complete(fetch_async(N))
+    print(len(results))
+    end = time.perf_counter()
+    print(f"Fetching {N} requests takes {end-start} seconds")

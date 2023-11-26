@@ -1,7 +1,7 @@
 import numpy as np
 
 
-async def findCosineDistance(source_representation, test_representation) -> float:
+def findCosineDistance(source_representation, test_representation) -> float:
     a = np.matmul(np.transpose(source_representation), test_representation)
     b = np.sum(np.multiply(source_representation, source_representation))
     c = np.sum(np.multiply(test_representation, test_representation))
