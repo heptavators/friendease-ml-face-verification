@@ -1,6 +1,4 @@
-import time
 import cv2
-import asyncio
 import numpy as np
 
 from . import Facenet
@@ -24,9 +22,9 @@ def build_model() -> Model:
     return model_obj
 
 
-def verify(
-    template1: np.ndarray,
-    template2: np.ndarray,
+def verify_profile(
+    id_card: np.ndarray,
+    selfie: np.ndarray,
     profile_image: np.ndarray,
     distance_metric: str = "cosine",
 ) -> dict:
@@ -37,7 +35,7 @@ def verify(
     distance) than vectors of different persons.
 
     Parameters:
-            template1, template2, profile_image: numpy array (BGR).
+            id_card, selfie, profile_image: numpy array (BGR).
 
             distance_metric (string): cosine, euclidean
 
@@ -62,13 +60,13 @@ def verify(
     # --------------------------------
     target_size = functions.find_target_size()
 
-    template1_objs, template2_objs, profile_objs = (
-        functions.extract_faces(img=template1, target_size=target_size),
-        functions.extract_faces(img=template2, target_size=target_size),
+    id_card_objs, selfie_objs, profile_image_objs = (
+        functions.extract_faces(img=id_card, target_size=target_size),
+        functions.extract_faces(img=selfie, target_size=target_size),
         functions.extract_faces(img=profile_image, target_size=target_size),
     )
 
-    if len(profile_objs) > 1:
+    if len(profile_image_objs) > 1:
         return {
             "verified": False,
             "message": "There's more than one people in your profile image, make sure there's only you in the image",
@@ -76,25 +74,31 @@ def verify(
 
         # --------------------------------
 
-    template1_embedding_obj, template2_embedding_obj, profile_embedding_obj = (
-        represent(template1_objs[0][0]),
-        represent(template2_objs[0][0]),
-        represent(profile_objs[0][0]),
+    id_card_embedding_obj, selfie_embedding_obj, profile_image_embedding_obj = (
+        represent(id_card_objs[0][0]),
+        represent(selfie_objs[0][0]),
+        represent(profile_image_objs[0][0]),
     )
 
-    template1_representation = template1_embedding_obj[0]["embedding"]
-    template2_representation = template2_embedding_obj[0]["embedding"]
-    profile_representation = profile_embedding_obj[0]["embedding"]
+    id_card_representation = id_card_embedding_obj[0]["embedding"]
+    selfie_representation = selfie_embedding_obj[0]["embedding"]
+    profile_image_representation = profile_image_embedding_obj[0]["embedding"]
 
     if distance_metric == "cosine":
-        distance1, distance2 = (
-            dst.findCosineDistance(template1_representation, profile_representation),
-            dst.findCosineDistance(template2_representation, profile_representation),
+        id_card_with_profile_distance, selfie_with_profile_distance = (
+            dst.findCosineDistance(
+                id_card_representation, profile_image_representation
+            ),
+            dst.findCosineDistance(selfie_representation, profile_image_representation),
         )
     elif distance_metric == "euclidean":
-        distance1, distance2 = (
-            dst.findEuclideanDistance(template1_representation, profile_representation),
-            dst.findEuclideanDistance(template2_representation, profile_representation),
+        id_card_with_profile_distance, selfie_with_profile_distance = (
+            dst.findEuclideanDistance(
+                id_card_representation, profile_image_representation
+            ),
+            dst.findEuclideanDistance(
+                selfie_representation, profile_image_representation
+            ),
         )
     else:
         logger.error(f"Invalid distance_metric passed - {distance_metric}")
@@ -102,7 +106,94 @@ def verify(
     # -------------------------------
     threshold = dst.findThreshold(distance_metric)
 
-    verified = True if (distance1 <= threshold or distance2 <= threshold) else False
+    verified = (
+        True
+        if (
+            id_card_with_profile_distance <= threshold
+            or selfie_with_profile_distance <= threshold
+        )
+        else False
+    )
+    message = (
+        "Your face is verified"
+        if verified
+        else "Your face is not verified! You only can upload your own images not other's"
+    )
+
+    return {"verified": verified, "message": message}
+
+
+def verify_id_card(
+    id_card: np.ndarray,
+    selfie: np.ndarray,
+    distance_metric: str = "cosine",
+) -> dict:
+    """
+    This function verifies an image pair is same person or different persons. In the background,
+    verification function represents facial images as vectors and then calculates the similarity
+    between those vectors. Vectors of same person images should have more similarity (or less
+    distance) than vectors of different persons.
+
+    Parameters:
+            id_card, selfie: numpy array (BGR).
+
+            distance_metric (string): cosine, euclidean
+
+            enforce_detection (boolean): If no face could not be detected in an image, then this
+            function will return exception by default. Set this to False not to have this exception.
+            This might be convenient for low resolution images.
+
+            align (boolean): alignment according to the eye positions.
+
+            normalization (string): normalize the input image before feeding to model
+
+    Returns:
+            Verify function returns a dictionary.
+
+            {
+                    "verified": True
+                    "message": "Some messages"
+            }
+
+    """
+
+    # --------------------------------
+    target_size = functions.find_target_size()
+
+    id_card_objs, selfie_objs = (
+        functions.extract_faces(img=id_card, target_size=target_size),
+        functions.extract_faces(img=selfie, target_size=target_size),
+    )
+
+    if len(selfie_objs) > 1:
+        return {
+            "verified": False,
+            "message": "There's more than one people in your image, make sure there's only you in the image",
+        }
+
+        # --------------------------------
+
+    id_card_embedding_obj, selfie_embedding_obj = (
+        represent(id_card_objs[0][0]),
+        represent(selfie_objs[0][0]),
+    )
+
+    id_card_representation = id_card_embedding_obj[0]["embedding"]
+    selfie_representation = selfie_embedding_obj[0]["embedding"]
+
+    if distance_metric == "cosine":
+        distance = dst.findCosineDistance(id_card_representation, selfie_representation)
+    elif distance_metric == "euclidean":
+        distance = dst.findEuclideanDistance(
+            id_card_representation, selfie_representation
+        )
+    else:
+        logger.error(f"Invalid distance_metric passed - {distance_metric}")
+
+    # -------------------------------
+    threshold = dst.findThreshold(distance_metric)
+
+    verified = distance <= threshold
     message = (
         "Your face is verified"
         if verified
