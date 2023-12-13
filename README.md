@@ -9,13 +9,13 @@
 --> Clone the repository using command below :
 
 ```bash
-git clone https://https://github.com/heptavators/face-verification-service.git
+git clone https://https://github.com/heptavators/friendease-ml-face-verification.git
 ```
 
 --> Move into the directory :
 
 ```bash
-cd face-verification-service
+cd friendease-ml-face-verification
 ```
 
 --> Create a virtual environment :
