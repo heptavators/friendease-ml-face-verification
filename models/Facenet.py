@@ -2217,7 +2217,7 @@ def InceptionResNetV2(dimension=128) -> Model:
 
 
 def loadModel(
-    url="https://github.com/serengil/deepface_models/releases/download/v1.0/facenet_weights.h5",
+    url="https://github.com/serengil/deepface_models/releases/download/v1.0/facenet_weights.h5"
 ) -> Model:
     model = InceptionResNetV2()
 

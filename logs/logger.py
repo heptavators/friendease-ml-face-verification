@@ -1,4 +1,5 @@
 import logging
+import sys
 import warnings
 import tensorflow as tf
 
@@ -10,9 +11,8 @@ warnings.filterwarnings("ignore")
 logger = logger
 
 logger.add(
-    "logs/history/{time:DD-MM-YYYY}.log",
+    sys.stdout,
     format="{time:DD-MM-YYYY at HH:mm:ss} | {level} | {message}",
-    rotation="10 MB",
     level="DEBUG",
     colorize=True,
     enqueue=True,

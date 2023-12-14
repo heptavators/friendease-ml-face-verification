@@ -39,3 +39,9 @@ venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
+
+--> Run the code :
+
+```bash
+uvicorn src.api.main:app --reload
+```
