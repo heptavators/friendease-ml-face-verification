@@ -1,0 +1,8 @@
+# Data path
+data:
+    face: data/FaceData
+    haar: data/haarcascade_frontalface_default.xml
+
+# Model path
+model:
+    siamese: models/siamese_model-final.data-00000-of-00001

@@ -1,15 +1,32 @@
 <div align="center">
-
-# Face Verification API
-
+<img src="https://i.gifer.com/LRP3.gif" >  
 </div>
 
-### Cloning the repository
+<br>
+
+# Recommender System API
+
+## Technology Used :
+
+-   Python
+-   FastAPI
+
+## Installed Packages
+
+-   tensorflow
+-   scikit-learn
+-   pandas
+-   numpy
+-   uvicorn
+-   httpx
+-   pydantic
+
+## How To Run / Install On Your Local Machine
 
 --> Clone the repository using command below :
 
 ```bash
-git clone https://https://github.com/heptavators/friendease-ml-face-verification.git
+git clone https://github.com/heptavators/friendease-ml-face-verification.git
 ```
 
 --> Move into the directory :
@@ -18,30 +35,14 @@ git clone https://https://github.com/heptavators/friendease-ml-face-verification
 cd friendease-ml-face-verification
 ```
 
---> Create a virtual environment :
+--> Create a docker container :
 
 ```bash
-# Install virtualenv first
-pip install virtualenv
-
-# Then create virtual environment
-virtualenv venv
+docker build -t friendease-ml-face-verification --no-cache -f Dockerfile .
 ```
 
---> Activate the virtual environment :
+--> Run the project :
 
 ```bash
-venv\Scripts\activate
-```
-
---> Install the requirements :
-
-```bash
-pip install -r requirements.txt
-```
-
---> Run the code :
-
-```bash
-uvicorn src.api.main:app --reload
+docker run -p 5050:5050 friendease-ml-face-verification
 ```

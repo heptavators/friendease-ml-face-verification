@@ -4,8 +4,8 @@ import asyncio
 
 from PIL import Image
 from mtcnn import MTCNN
-from common import distance
-from detectors import MtcnnWrapper
+from app.core import distance
+from . import MtcnnWrapper
 
 
 def build_model() -> MTCNN:

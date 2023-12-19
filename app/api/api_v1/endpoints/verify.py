@@ -1,9 +1,10 @@
 import time
 import asyncio
+from app.schemas import schemas
 
 from logs import logger
-from common import functions
-from models import FaceVerifier, schemas
+from app.core import functions
+from app.api import FaceVerifier
 from fastapi import APIRouter, Request, status
 
 router = APIRouter(

@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from fastapi import FastAPI
-from src.routers import verify
+from app.api.api_v1.endpoints import verify
 
 os.environ["$WEB_CONCURRENCY"] = str(os.cpu_count() + 4)
 

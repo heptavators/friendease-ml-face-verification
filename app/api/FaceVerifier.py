@@ -1,9 +1,11 @@
 import cv2
 import numpy as np
 
-from . import Facenet
+from app.core import distance as dst
+
+from ..builder import Facenet
 from logs import logger
-from common import functions, distance as dst
+from app.core import functions
 from tensorflow.keras.models import Model
 
 

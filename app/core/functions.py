@@ -7,8 +7,8 @@ import imageio.v3 as iio
 
 from pathlib import Path
 from keras.preprocessing import image
-from detectors import FaceDetector
-from logs import logger
+from app.detectors import FaceDetector
+from app.core.logs import logger
 
 
 def initialize_folder() -> None:

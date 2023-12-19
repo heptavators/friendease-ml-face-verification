@@ -5,7 +5,7 @@ import imageio.v2 as imageio
 import numpy as np
 
 from concurrent.futures import ThreadPoolExecutor
-from common import functions
+from app.core import functions
 
 URL = "https://wallpapercave.com/wp/wp8913058.jpg"
 
