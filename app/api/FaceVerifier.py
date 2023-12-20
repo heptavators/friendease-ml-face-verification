@@ -3,25 +3,10 @@ import numpy as np
 
 from app.core import distance as dst
 
-from ..builder import Facenet
-from logs import logger
+from app.builder import facenet, siamese
 from app.core import functions
+from app.core.logs import logger
 from tensorflow.keras.models import Model
-
-
-def build_model() -> Model:
-    """
-    Returns:
-            built Face Verification model
-    """
-
-    # singleton design pattern
-    global model_obj
-
-    if not "model_obj" in globals():
-        model_obj = Facenet.loadModel()
-
-    return model_obj
 
 
 def verify_profile(
@@ -225,7 +210,8 @@ def represent(
     """
     resp_objs = []
 
-    model = build_model()
+    # model = siamese
+    model = facenet
 
     # ---------------------------------
     # we have run pre-process in verification. so, this can be skipped if it is coming from verify.

@@ -2,7 +2,10 @@ import os
 import gdown
 import tensorflow as tf
 
+
+from pathlib import Path
 from app.core import functions
+from app.core.logs import logger
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Activation
 from tensorflow.keras.layers import BatchNormalization
@@ -2216,6 +2219,34 @@ def InceptionResNetV2(dimension=128) -> Model:
 # url = 'https://drive.google.com/uc?id=1971Xk5RwedbudGgTIrGAL4F7Aifu7id1'
 
 
+def initialize_folder() -> None:
+    """Initialize the folder for storing weights and models.
+
+    Raises:
+        OSError: if the folder cannot be created.
+    """
+    home = get_facenet_home()
+    facenet_home_path = home + "/.facenet"
+    weight_path = facenet_home_path + "/weights"
+
+    if not os.path.exists(facenet_home_path):
+        os.makedirs(facenet_home_path, exist_ok=True)
+        logger.info("Directory ", home, "/.facenet created")
+
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path, exist_ok=True)
+        logger.info("Directory ", home, "/.facenet/weights created")
+
+
+def get_facenet_home() -> str:
+    """Get the home directory for storing weights and models.
+
+    Returns:
+        str: the home directory.
+    """
+    return str(os.getenv("FACENET_HOME", default=str(Path.home())))
+
+
 def loadModel(
     url="https://github.com/serengil/deepface_models/releases/download/v1.0/facenet_weights.h5",
 ) -> Model:
@@ -2223,7 +2254,7 @@ def loadModel(
 
     # -----------------------------------
 
-    home = functions.get_facenet_home()
+    home = get_facenet_home()
 
     if os.path.isfile(home + "/.facenet/weights/facenet_weights.h5") != True:
         print("facenet_weights.h5 will be downloaded...")

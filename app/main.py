@@ -1,21 +1,35 @@
-import numpy as np
-import os
-
 from fastapi import FastAPI
-from app.api.api_v1.endpoints import verify
-
-os.environ["$WEB_CONCURRENCY"] = str(os.cpu_count() + 4)
+from fastapi.responses import HTMLResponse
+from app.core.config import settings
+from app.api.api_v1.api import api_router
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="Face Verification",
-    description="API Face Verification for FriendEase Application",
-    version="1.0.0",
+    title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
 
 @app.get("/")
-async def root():
-    return {"message": "Face verification API"}
+def root():
+    image_link = (
+        "https://i.pinimg.com/564x/ac/86/3f/ac863ff709559d6d180e7a9287f2c3a4.jpg"
+    )
+
+    return HTMLResponse(
+        content=f'<div style="text-align:center"><img src="{image_link}" alt="Image"></div>',
+        status_code=200,
+    )
 
 
-app.include_router(verify.router)
+# Set all CORS enabled origins
+if settings.BACKEND_CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+
+app.include_router(api_router, prefix=settings.API_V1_STR)

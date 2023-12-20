@@ -1,21 +1,18 @@
 import time
 import asyncio
-from app.schemas import schemas
+from app.schemas import VerifyIdCard, VerifyProfile, FaceResult
 
-from logs import logger
 from app.core import functions
+from app.core.logs import logger
 from app.api import FaceVerifier
 from fastapi import APIRouter, Request, status
 
-router = APIRouter(
-    prefix="/verify",
-    tags=["Face Verification"],
-)
+router = APIRouter()
 
 
-@router.get("/")
-async def root():
-    return {"message": "Endpoint for face verification"}
+@router.get("")
+def root():
+    return {"message": "Verify endpoint"}
 
 
 @router.post(
@@ -26,25 +23,18 @@ async def root():
         }
     },
 )
-async def verify_face(payload: Request) -> schemas.FaceResult:
-    try:
-        payload = await payload.json()
-    except:
-        logger.error("Something went wrong")
-
+async def verify_id_card(payload: VerifyIdCard) -> FaceResult:
     start = time.perf_counter()
     id_card, selfie = await asyncio.gather(
-        functions.load_image(payload.get("id_card")),
-        functions.load_image(payload.get("selfie")),
+        functions.load_image(payload.id_card),
+        functions.load_image(payload.selfie),
     )
 
     result = FaceVerifier.verify_id_card(id_card, selfie)
     end = time.perf_counter()
-    print(f"Verifying needs {end-start} seconds")
+    logger.debug(f"Verifying id-card needs {end-start} seconds")
 
-    response = schemas.FaceResult(
-        verified=result["verified"], message=result["message"]
-    )
+    response = FaceResult(verified=result["verified"], message=result["message"])
 
     return response
 
@@ -57,25 +47,18 @@ async def verify_face(payload: Request) -> schemas.FaceResult:
         }
     },
 )
-async def verify_face(payload: Request) -> schemas.FaceResult:
-    try:
-        payload = await payload.json()
-    except:
-        logger.error("Something went wrong")
-
+async def verify_profile(payload: VerifyProfile) -> FaceResult:
     start = time.perf_counter()
     id_card, selfie, profile_image = await asyncio.gather(
-        functions.load_image(payload.get("id_card")),
-        functions.load_image(payload.get("selfie")),
-        functions.load_image(payload.get("profile_image")),
+        functions.load_image(payload.id_card),
+        functions.load_image(payload.selfie),
+        functions.load_image(payload.profile_image),
     )
 
     result = FaceVerifier.verify_profile(id_card, selfie, profile_image)
     end = time.perf_counter()
-    print(f"Verifying needs {end-start} seconds")
+    logger.debug(f"Verifying profile needs {end-start} seconds")
 
-    response = schemas.FaceResult(
-        verified=result["verified"], message=result["message"]
-    )
+    response = FaceResult(verified=result["verified"], message=result["message"])
 
     return response

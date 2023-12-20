@@ -1,20 +1,10 @@
 import math
 import numpy as np
-import asyncio
 
 from PIL import Image
 from mtcnn import MTCNN
-from app.core import distance
 from . import MtcnnWrapper
-
-
-def build_model() -> MTCNN:
-    global face_detector_obj  # singleton design pattern
-
-    if not "face_detector_obj" in globals():
-        face_detector_obj = MtcnnWrapper.build_model()
-
-    return face_detector_obj
+from app.core import distance
 
 
 def detect_faces(face_detector: MTCNN, img: np.ndarray) -> list:

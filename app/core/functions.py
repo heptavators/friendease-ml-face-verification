@@ -1,42 +1,13 @@
-import os
 import base64
 import numpy as np
 import cv2
 import aiohttp
 import imageio.v3 as iio
 
-from pathlib import Path
-from keras.preprocessing import image
-from app.detectors import FaceDetector
 from app.core.logs import logger
-
-
-def initialize_folder() -> None:
-    """Initialize the folder for storing weights and models.
-
-    Raises:
-        OSError: if the folder cannot be created.
-    """
-    home = get_facenet_home()
-    facenet_home_path = home + "/.facenet"
-    weight_path = facenet_home_path + "/weights"
-
-    if not os.path.exists(facenet_home_path):
-        os.makedirs(facenet_home_path, exist_ok=True)
-        logger.info("Directory ", home, "/.facenet created")
-
-    if not os.path.exists(weight_path):
-        os.makedirs(weight_path, exist_ok=True)
-        logger.info("Directory ", home, "/.facenet/weights created")
-
-
-def get_facenet_home() -> str:
-    """Get the home directory for storing weights and models.
-
-    Returns:
-        str: the home directory.
-    """
-    return str(os.getenv("FACENET_HOME", default=str(Path.home())))
+from app.builder import face_detector
+from app.detectors import FaceDetector
+from tensorflow.keras.preprocessing import image
 
 
 async def fetch_image(url) -> np.ndarray:
@@ -136,7 +107,6 @@ def extract_faces(
     if detector_backend == "skip":
         face_objs = [(img, img_region, 0)]
     else:
-        face_detector = FaceDetector.build_model()
         face_objs = FaceDetector.detect_faces(face_detector, img)
 
     # in case of no face found

@@ -11,13 +11,13 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # Copy the entire project into the container at /app
-COPY ./.env /app/.env
+COPY ./.env.example /app/.env
 COPY ./app /app/app
 COPY ./data /app/data
 COPY ./models /app/models
 
-# Make port 5050 available to the world outside this container
-EXPOSE 5050
+# Make port 6969 available to the world outside this container
+EXPOSE 6969
 
 # Run uvicorn when the container launches
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5050", "--lifespan", "on", "--loop", "asyncio"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "6969", "--lifespan", "on", "--loop", "asyncio"]

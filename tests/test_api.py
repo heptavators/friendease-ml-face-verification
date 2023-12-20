@@ -1,5 +1,4 @@
 import base64
-import aiohttp
 import httpx
 import unittest
 
@@ -23,8 +22,8 @@ class TestAPI(unittest.TestCase):
             return base64.b64encode(image_binary).decode("utf-8")
 
     def test_app_root(self):
-        data = self.__fetch_json__(f"{LOCALHOST}")
-        self.assertEqual(data, {"message": "Face verification API"})
+        data = self.client.get("/api/v1/verify").json()
+        self.assertEqual(data, {"message": "Verify endpoint"})
 
     def test_verify_id_card_verified(self):
         id_card = self.__fetch_base64__(ID_CARD)

@@ -1,13 +1,8 @@
 import cv2
 import numpy as np
 
-from . import FaceDetector
 from mtcnn import MTCNN
-
-
-def build_model() -> MTCNN:
-    face_detector = MTCNN()
-    return face_detector
+from . import FaceDetector
 
 
 def detect_face(face_detector: MTCNN, img: np.ndarray, align=True) -> list:
