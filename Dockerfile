@@ -13,7 +13,6 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 # Copy the entire project into the container at /app
 COPY ./.env.example /app/.env
 COPY ./app /app/app
-COPY ./data /app/data
 COPY ./models /app/models
 
 # Make port 6969 available to the world outside this container
