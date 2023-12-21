@@ -1,13 +1,8 @@
 # Use an official Python runtime as a parent image
-FROM python:3.8-alpine
+FROM python:3.9
 
 # Set the working directory to /app
 WORKDIR /app
-
-# Install required system packages including libgl1-mesa-glx
-RUN apt-get update && \
-    apt-get install -y libgl1-mesa-glx && \
-    rm -rf /var/lib/apt/lists/*
 
 # Copy list of packages needed
 COPY requirements.txt /app/requirements.txt
