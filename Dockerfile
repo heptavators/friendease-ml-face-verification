@@ -5,10 +5,11 @@ FROM python:3.9
 WORKDIR /app
 
 # Copy list of packages needed
-COPY requirements.txt /app/requirements.txt
+COPY ./requirements.txt /app/requirements.txt
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy the entire project into the container at /app
 COPY ./.env.example /app/.env
