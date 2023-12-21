@@ -38,11 +38,11 @@ cd friendease-ml-face-verification
 --> Create a docker container :
 
 ```bash
-docker build -t friendease-ml-face-verification --no-cache -f Dockerfile .
+docker build -t friendease/ml-face-verification --no-cache -f Dockerfile .
 ```
 
 --> Run the project :
 
 ```bash
-docker run -p 5050:5050 friendease-ml-face-verification
+docker run -p 5050:5050 friendease/ml-face-verification
 ```

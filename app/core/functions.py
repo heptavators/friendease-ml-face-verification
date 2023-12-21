@@ -1,6 +1,6 @@
 import base64
 import numpy as np
-import cv2
+import cv2 as cv
 import aiohttp
 import imageio.v3 as iio
 
@@ -122,7 +122,7 @@ def extract_faces(
     for current_img, current_region, confidence in face_objs:
         if current_img.shape[0] > 0 and current_img.shape[1] > 0:
             if grayscale is True:
-                current_img = cv2.cvtColor(current_img, cv2.COLOR_BGR2GRAY)
+                current_img = cv.cvtColor(current_img, cv.COLOR_BGR2GRAY)
 
                 # resize and padding
                 factor_0 = target_size[0] / current_img.shape[0]
@@ -133,7 +133,7 @@ def extract_faces(
                     int(current_img.shape[1] * factor),
                     int(current_img.shape[0] * factor),
                 )
-                current_img = cv2.resize(current_img, dsize)
+                current_img = cv.resize(current_img, dsize)
 
                 diff_0 = target_size[0] - current_img.shape[0]
                 diff_1 = target_size[1] - current_img.shape[1]
@@ -160,7 +160,7 @@ def extract_faces(
 
             # double check: if target image is not still the same size with target.
             if current_img.shape[0:2] != target_size:
-                current_img = cv2.resize(current_img, target_size)
+                current_img = cv.resize(current_img, target_size)
 
             # normalizing the image pixels
             img_pixels = image.img_to_array(current_img)
