@@ -10,6 +10,7 @@ COPY ./requirements.txt /app/requirements.txt
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN apt-get update && apt-get install libgl1
 
 # Copy the entire project into the container at /app
 COPY ./.env.example /app/.env
