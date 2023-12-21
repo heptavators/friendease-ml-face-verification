@@ -98,6 +98,7 @@ retina-face==0.0.13
 rsa==4.9
 scikit-learn==1.3.2
 scipy==1.11.4
+seaborn==0.13.0
 six==1.16.0
 sniffio==1.3.0
 soupsieve==2.5
