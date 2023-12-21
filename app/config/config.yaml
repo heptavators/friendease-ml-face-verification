@@ -6,3 +6,4 @@ data:
 # Model path
 model:
     siamese: models/siamese.h5
+    facenet: models/facenet_weights.h5
